@@ -11,81 +11,36 @@ using BepInEx.Configuration;
 namespace LagLess
 {
 
-    [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.2")]
-    public class MapPlugin : BaseUnityPlugin
+    public class LLConstants
     {
-        // State
+        public static int pickupLayer = 24;
+        public static int pickerupLayer = 23;
+        public static int bulletLayer = 25;
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
-        static int pickupLayer = 24;
-        static int pickerupLayer = 23;
-        static int bulletLayer = 25;
 
+    }
+
+
+    [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.2")]
+    public class LagLessPlugin : BaseUnityPlugin
+    {
+
+        // Dev
+        static bool dev = true;
+        private ConfigEntry<KeyboardShortcut> JuiceMe { get; set; }
+
+        public void Constructor()
+        {
+            JuiceMe = Config.Bind("Hotkeys", "Juice", new KeyboardShortcut(KeyCode.K));
+        }
 
         private void Awake()
         {
-            StaticLogger = Logger;
+            LLConstants.StaticLogger = Logger;
 
             Harmony.CreateAndPatchAll(typeof(PlayerPatch));
             Harmony.CreateAndPatchAll(typeof(ObjectPooler));
         }
-
-        [HarmonyPatch(typeof(PlayerController))]
-        public class PlayerPatch
-        {
-
-            [HarmonyPatch("Start")]
-            [HarmonyPostfix]
-            static void Start()
-            {
-                Physics2D.IgnoreLayerCollision(0, pickupLayer, true);
-                Physics2D.IgnoreLayerCollision(0, pickerupLayer, true);
-                Physics2D.IgnoreLayerCollision(pickupLayer, pickupLayer, true);
-
-                Physics2D.IgnoreLayerCollision(bulletLayer, bulletLayer, true);
-                Physics2D.IgnoreLayerCollision(bulletLayer, pickupLayer, true);
-                Physics2D.IgnoreLayerCollision(bulletLayer, pickerupLayer, true);
-
-                GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
-                PickerUpper.layer = pickerupLayer;
-            }
-
-
-        }
-
-        [HarmonyPatch(typeof(flanne.ObjectPooler))]
-        public class ObjectPooler
-        {
-
-            [HarmonyPatch("Awake")]
-            [HarmonyPostfix]
-            static void Awake()
-            {
-                StaticLogger.LogInfo("Pooler Awake");
-            }
-
-            [HarmonyPatch("GetPooledObject")]
-            [HarmonyPostfix]
-            static void GetPooledObject(ref string tag, ref GameObject __result)
-            {
-
-                if (__result.tag == "Pickup")
-                {
-                    StaticLogger.LogInfo($"Changing layer for: {tag}");
-                    __result.layer = pickupLayer;
-                }
-
-                if (__result.tag == "Bullet")
-                {
-                    StaticLogger.LogInfo($"Changing layer for: {tag}");
-                    __result.layer = bulletLayer;
-                }
-
-            }
-
-        }
-
-
-
 
     }
 }
