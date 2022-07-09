@@ -18,6 +18,7 @@ namespace LagLess
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
         static int pickupLayer = 24;
         static int pickerupLayer = 23;
+        static int bulletLayer = 25;
 
 
         private void Awake()
@@ -39,6 +40,10 @@ namespace LagLess
                 Physics2D.IgnoreLayerCollision(0, pickupLayer, true);
                 Physics2D.IgnoreLayerCollision(0, pickerupLayer, true);
                 Physics2D.IgnoreLayerCollision(pickupLayer, pickupLayer, true);
+
+                Physics2D.IgnoreLayerCollision(bulletLayer, bulletLayer, true);
+                Physics2D.IgnoreLayerCollision(bulletLayer, pickupLayer, true);
+                Physics2D.IgnoreLayerCollision(bulletLayer, pickerupLayer, true);
 
                 GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
                 PickerUpper.layer = pickerupLayer;
@@ -67,6 +72,12 @@ namespace LagLess
                 {
                     StaticLogger.LogInfo($"Changing layer for: {tag}");
                     __result.layer = pickupLayer;
+                }
+
+                if (__result.tag == "Bullet")
+                {
+                    StaticLogger.LogInfo($"Changing layer for: {tag}");
+                    __result.layer = bulletLayer;
                 }
 
             }
