@@ -11,12 +11,11 @@ using BepInEx.Configuration;
 namespace LagLess
 {
 
-    [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.1")]
+    [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.2")]
     public class MapPlugin : BaseUnityPlugin
     {
         // State
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
-        internal static long numberGoBigger;
 
 
         private void Awake()
@@ -30,27 +29,79 @@ namespace LagLess
         [HarmonyPatch(typeof(PlayerController))]
         public class PlayerPatch
         {
+            static int howOften = 60;
+            static int count = 0;
+
             [HarmonyPatch("Update")]
             [HarmonyPrefix]
             static void Update(PlayerController __instance)
             {
-                // StaticLogger.LogInfo("This is information");
+
+                if (count >= howOften)
+                {
+                    Vector3 playerLocation = __instance.transform.position;
+                    Collider2D[] collisions = Physics2D.OverlapCircleAll(playerLocation, 20);
+
+                    foreach (Collider2D collision in collisions)
+                    {
+                        if (collision.tag == "Pickup")
+                        {
+                            StaticLogger.LogInfo("pickup found");
+
+                            flanne.Pickups.XPPickup xppickup = collision.GetComponent<flanne.Pickups.XPPickup>();
+                            if (xppickup)
+                            {
+                                StaticLogger.LogInfo($"pickup amount {xppickup.amount}");
+                            }
+                        }
+                    }
+
+
+
+                    count = 0;
+                }
+                else
+                {
+                    count++;
+                }
+
+
+
             }
 
 
 
         }
 
-        [HarmonyPatch(typeof(flanne.Pickups.Pickup))]
+        // [HarmonyPatch(typeof(flanne.Pickups.XPPickup))]
+        // public class PickupPatch
+        // {
+        //     [HarmonyPatch("SetActive")]
+        //     [HarmonyPostfix]
+        //     static void OnEnable(flanne.Pickups.XPPickup __instance)
+        //     {
+        //         StaticLogger.LogInfo($"amnount {__instance.amount}");
+        //     }
+
+        //     [HarmonyPatch("UsePickup")]
+        //     [HarmonyPostfix]
+        //     static void UsePickup(flanne.Pickups.XPPickup __instance)
+        //     {
+        //         StaticLogger.LogInfo($"usePickup amnount {__instance.amount}");
+        //     }
+
+        // }
+
+        [HarmonyPatch(typeof(flanne.PowerupSystem.SummonOnEnemyDeath))]
         public class PickupPatch
         {
-            [HarmonyPatch("OnTriggerEnter2D")]
-            [HarmonyPrefix]
-            static void OnTriggerEnter2D()
+            [HarmonyPatch("OnDeath")]
+            [HarmonyPostfix]
+            static void OnDeath(flanne.PowerupSystem.SummonOnEnemyDeath __instance)
             {
-                StaticLogger.LogInfo($"Pickup Collider {numberGoBigger}");
-                numberGoBigger++;
+                StaticLogger.LogInfo($"sdsadsa");
             }
+
 
         }
 
