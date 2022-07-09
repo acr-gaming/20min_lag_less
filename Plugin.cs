@@ -65,7 +65,6 @@ namespace LagLess
                     __result.layer = pickupLayer;
                 }
 
-
             }
 
         }
