@@ -16,6 +16,7 @@ namespace LagLess
     {
         // State
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
+        static int pickupLayer = 10;
 
 
         private void Awake()
@@ -23,98 +24,53 @@ namespace LagLess
             StaticLogger = Logger;
 
             Harmony.CreateAndPatchAll(typeof(PlayerPatch));
-            Harmony.CreateAndPatchAll(typeof(PickupPatch));
+            Harmony.CreateAndPatchAll(typeof(ObjectPooler));
         }
 
         [HarmonyPatch(typeof(PlayerController))]
         public class PlayerPatch
         {
-            static int experienceLayer = 10;
-            static int count = 0;
 
             [HarmonyPatch("Start")]
             [HarmonyPostfix]
             static void Start()
             {
-                Physics2D.IgnoreLayerCollision(0, experienceLayer, true);
+                Physics2D.IgnoreLayerCollision(0, pickupLayer, true);
                 GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
                 PickerUpper.layer = 10;
             }
 
 
-            // [HarmonyPatch("Update")]
-            // [HarmonyPrefix]
-            // static void Update(PlayerController __instance)
-            // {
-            //     int playerLevel = __instance.GetComponentInChildren<flanne.Player.PlayerXP>().level;
-
-
-            //     if (playerLevel >= 60)
-            //     {
-
-
-            //         if (count >= howOften)
-            //         {
-            //             Vector3 playerLocation = __instance.transform.position;
-            //             Collider2D[] collisions = Physics2D.OverlapCircleAll(playerLocation, 100);
-
-            //             foreach (Collider2D collision in collisions)
-            //             {
-            //                 if (collision.tag == "Pickup")
-            //                 {
-            //                     StaticLogger.LogInfo("pickup found");
-
-            //                     flanne.Pickups.XPPickup xppickup = collision.GetComponent<flanne.Pickups.XPPickup>();
-            //                     if (xppickup)
-            //                     {
-            //                         Destroy(xppickup.transform.gameObject);
-            //                     }
-            //                 }
-            //             }
-            //             count = 0;
-            //         }
-            //         else
-            //         {
-            //             count++;
-            //         }
-            //    }
-            //}
-
-
-
         }
 
-        // [HarmonyPatch(typeof(flanne.Pickups.XPPickup))]
-        // public class PickupPatch
-        // {
-        //     [HarmonyPatch("SetActive")]
-        //     [HarmonyPostfix]
-        //     static void OnEnable(flanne.Pickups.XPPickup __instance)
-        //     {
-        //         StaticLogger.LogInfo($"amnount {__instance.amount}");
-        //     }
-
-        //     [HarmonyPatch("UsePickup")]
-        //     [HarmonyPostfix]
-        //     static void UsePickup(flanne.Pickups.XPPickup __instance)
-        //     {
-        //         StaticLogger.LogInfo($"usePickup amnount {__instance.amount}");
-        //     }
-
-        // }
-
-        [HarmonyPatch(typeof(flanne.PowerupSystem.SummonOnEnemyDeath))]
-        public class PickupPatch
+        [HarmonyPatch(typeof(flanne.ObjectPooler))]
+        public class ObjectPooler
         {
-            [HarmonyPatch("OnDeath")]
+
+            [HarmonyPatch("Awake")]
             [HarmonyPostfix]
-            static void OnDeath(flanne.PowerupSystem.SummonOnEnemyDeath __instance)
+            static void Awake()
             {
-                StaticLogger.LogInfo($"sdsadsa");
+                StaticLogger.LogInfo("Pooler Awake");
             }
 
+            [HarmonyPatch("GetPooledObject")]
+            [HarmonyPostfix]
+            static void GetPooledObject(ref string tag, ref GameObject __result)
+            {
+
+                if (__result.tag == "Pickup")
+                {
+                    StaticLogger.LogInfo($"Changing layer for: {tag}");
+                    __result.layer = pickupLayer;
+                }
+
+
+            }
 
         }
+
+
 
 
     }
