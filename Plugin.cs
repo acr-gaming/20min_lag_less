@@ -16,7 +16,8 @@ namespace LagLess
     {
         // State
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
-        static int pickupLayer = 10;
+        static int pickupLayer = 24;
+        static int pickerupLayer = 23;
 
 
         private void Awake()
@@ -36,8 +37,11 @@ namespace LagLess
             static void Start()
             {
                 Physics2D.IgnoreLayerCollision(0, pickupLayer, true);
+                Physics2D.IgnoreLayerCollision(0, pickerupLayer, true);
+                Physics2D.IgnoreLayerCollision(pickupLayer, pickupLayer, true);
+
                 GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
-                PickerUpper.layer = 10;
+                PickerUpper.layer = pickerupLayer;
             }
 
 
