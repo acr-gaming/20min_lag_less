@@ -30,6 +30,10 @@ namespace LagLess
             if (!LLConstants.dev || hasGivenUpgrades) return;
             hasGivenUpgrades = true;
 
+
+            flanne.Player.PlayerXP playerXP = player.GetComponentInChildren<flanne.Player.PlayerXP>();
+            playerXP.level = 100;
+
             PowerupGenerator powerupGenerator = flanne.PowerupGenerator.Instance;
 
             Dictionary<string, int> wantedPowerUps = new Dictionary<string, int>()
