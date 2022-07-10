@@ -1,14 +1,8 @@
-using BepInEx;
 using HarmonyLib;
 using flanne;
 
 using UnityEngine;
 using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System;
-using BepInEx.Configuration;
-
 
 namespace LagLess
 {
@@ -61,7 +55,6 @@ namespace LagLess
         int currentIndex;
         ObjectPoolItem baseObject;
         Transform baseTransform;
-
 
         public LLObjectPool(ObjectPoolItem inBaseObject, Transform inBaseTransform)
         {
@@ -142,8 +135,6 @@ namespace LagLess
     {
         Dictionary<string, LLObjectPool> objectPools;
         Transform baseTransform;
-        private Dictionary<string, int> lastPoolIndex;
-
 
         public ObjectPoolerReplacement(Transform inBaseTransform, List<ObjectPoolItem> itemsToPool)
         {
