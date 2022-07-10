@@ -142,7 +142,7 @@ namespace LagLess
             objectPools = new Dictionary<string, LLObjectPool>();
             foreach (var item in itemsToPool)
             {
-                LLConstants.StaticLogger.LogDebug($"ObjectPoolerReplacement:: Adding item to: {item.tag}");
+                LLConstants.StaticLogger.LogDebug($"ObjectPoolerReplacement:: Adding item: {item.tag}");
                 addNewPool(item);
             }
         }

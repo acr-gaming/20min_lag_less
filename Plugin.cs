@@ -8,6 +8,7 @@ using System.Linq;
 using System;
 using BepInEx.Configuration;
 
+
 namespace LagLess
 {
 
@@ -17,9 +18,24 @@ namespace LagLess
         public static int pickerupLayer = 23;
         public static int bulletLayer = 25;
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
-        public static bool dev = true;
-        public static bool enableOptimization = true;
     }
+
+    public class LLConfigs
+    {
+        static public ConfigEntry<bool> enableLayerOptimization;
+        static public ConfigEntry<bool> enableXPAggregation;
+        static public ConfigEntry<bool> enableJuice;
+
+
+        static public void initConfig(ConfigFile config)
+        {
+            enableLayerOptimization = config.Bind("General", "Enable Layer Optimization", true, "Moves bullets/xp into their own layers");
+            enableXPAggregation = config.Bind("General", "Enable XP Aggregation", true, "Aggregates XP pickups.");
+            enableJuice = config.Bind("General", "Enable Juice", false, "For dev - spawns experience with k and specific laggy upgrades with j.");
+        }
+    }
+
+
 
 
     [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.2")]
@@ -29,16 +45,17 @@ namespace LagLess
         private void Awake()
         {
             LLConstants.StaticLogger = Logger;
+            LLConfigs.initConfig(Config);
 
-            if (LLConstants.enableOptimization)
+            if (LLConfigs.enableLayerOptimization.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(ObjectPoolerPatch));
-                Harmony.CreateAndPatchAll(typeof(PlayerPatch));
+                Harmony.CreateAndPatchAll(typeof(PlayerPatchCollisionLayers));
             }
 
-            if (LLConstants.dev)
+            if (LLConfigs.enableJuice.Value)
             {
-                Harmony.CreateAndPatchAll(typeof(PlayerPatchDev));
+                Harmony.CreateAndPatchAll(typeof(PlayerPatchJuice));
             }
         }
 
