@@ -28,10 +28,11 @@ namespace LagLess
                 Physics2D.IgnoreLayerCollision(LLConstants.bulletLayer, LLConstants.bulletLayer, true);
                 Physics2D.IgnoreLayerCollision(LLConstants.bulletLayer, LLConstants.pickupLayer, true);
                 Physics2D.IgnoreLayerCollision(LLConstants.bulletLayer, LLConstants.pickerupLayer, true);
+
+                GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
+                PickerUpper.layer = LLConstants.pickerupLayer;
             }
 
-            GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
-            PickerUpper.layer = LLConstants.pickerupLayer;
         }
 
         [HarmonyPatch("Update")]
