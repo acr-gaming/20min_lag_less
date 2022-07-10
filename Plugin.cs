@@ -18,34 +18,27 @@ namespace LagLess
         public static int bulletLayer = 25;
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
         public static bool dev = true;
-        public static bool enableOptimization = false;
+        public static bool enableOptimization = true;
     }
-
-    public class LLControls
-    {
-        static public KeyboardShortcut JuiceMe;
-    }
-
 
 
     [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.2")]
     public class LagLessPlugin : BaseUnityPlugin
     {
 
-
-        public LagLessPlugin()
-        {
-            LLControls.JuiceMe = new KeyboardShortcut(KeyCode.K);
-        }
-
         private void Awake()
         {
             LLConstants.StaticLogger = Logger;
 
-            Harmony.CreateAndPatchAll(typeof(PlayerPatch));
             if (LLConstants.enableOptimization)
             {
                 Harmony.CreateAndPatchAll(typeof(ObjectPoolerPatch));
+                Harmony.CreateAndPatchAll(typeof(PlayerPatch));
+            }
+
+            if (LLConstants.dev)
+            {
+                Harmony.CreateAndPatchAll(typeof(PlayerPatchDev));
             }
         }
 
