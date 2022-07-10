@@ -17,8 +17,13 @@ namespace LagLess
         public static int pickerupLayer = 23;
         public static int bulletLayer = 25;
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
-
     }
+
+    public class LLControls
+    {
+        static public KeyboardShortcut JuiceMe;
+    }
+
 
 
     [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.2")]
@@ -27,11 +32,10 @@ namespace LagLess
 
         // Dev
         static bool dev = true;
-        private ConfigEntry<KeyboardShortcut> JuiceMe { get; set; }
 
-        public void Constructor()
+        public LagLessPlugin()
         {
-            JuiceMe = Config.Bind("Hotkeys", "Juice", new KeyboardShortcut(KeyCode.K));
+            LLControls.JuiceMe = new KeyboardShortcut(KeyCode.K);
         }
 
         private void Awake()
@@ -39,7 +43,7 @@ namespace LagLess
             LLConstants.StaticLogger = Logger;
 
             Harmony.CreateAndPatchAll(typeof(PlayerPatch));
-            Harmony.CreateAndPatchAll(typeof(ObjectPooler));
+            Harmony.CreateAndPatchAll(typeof(ObjectPoolerPatch));
         }
 
     }

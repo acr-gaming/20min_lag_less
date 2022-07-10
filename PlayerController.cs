@@ -15,6 +15,8 @@ namespace LagLess
         [HarmonyPostfix]
         static void Start()
         {
+            LLConstants.StaticLogger.LogDebug("PlayerController Started");
+
             // Pickups only collide with pickeruper
             Physics2D.IgnoreLayerCollision(0, LLConstants.pickupLayer, true);
             Physics2D.IgnoreLayerCollision(0, LLConstants.pickerupLayer, true);
@@ -27,6 +29,17 @@ namespace LagLess
 
             GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
             PickerUpper.layer = LLConstants.pickerupLayer;
+        }
+
+        [HarmonyPatch("Update")]
+        [HarmonyPostfix]
+        static void Update()
+        {
+            if (UnityEngine.InputSystem.Keyboard.current.kKey.isPressed)
+            {
+                LLConstants.StaticLogger.LogDebug("Key Pressed");
+            }
+
         }
 
 
