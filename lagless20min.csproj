@@ -20,7 +20,7 @@
   
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>lib\Assembly-CSharp.dll</HintPath>
+      <HintPath>lib\Assembly-CSharp-nstrip.dll</HintPath>
     </Reference>
     <Reference Include="Unity.InputSystem">
       <HintPath>lib\Unity.InputSystem.dll</HintPath>
