@@ -36,6 +36,14 @@ namespace LagLess
     [HarmonyPatch(typeof(PlayerController))]
     public class PlayerPatchDev
     {
+        static bool needsUpgrades = true;
+
+        [HarmonyPatch("Start")]
+        [HarmonyPostfix]
+        static void Start()
+        {
+            needsUpgrades = true;
+        }
 
         [HarmonyPatch("Update")]
         [HarmonyPostfix]
@@ -47,8 +55,9 @@ namespace LagLess
                 Juicer.SpawnExperience(2, __instance.transform.position, 15);
             }
 
-            if (UnityEngine.InputSystem.Keyboard.current.jKey.isPressed)
+            if (needsUpgrades && UnityEngine.InputSystem.Keyboard.current.jKey.isPressed)
             {
+                needsUpgrades = false;
                 Juicer.UpgradesPlease(__instance);
             }
 

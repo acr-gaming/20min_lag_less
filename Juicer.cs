@@ -9,12 +9,8 @@ namespace LagLess
 
     class Juicer
     {
-        static bool hasGivenUpgrades = false;
-
         public static void SpawnExperience(int num, Vector2 location, int radius)
         {
-            if (!LLConstants.dev) return;
-
             for (int i = 0; i < num; i++)
             {
                 Vector2 randomLocation = Random.insideUnitCircle * radius + location;
@@ -27,10 +23,6 @@ namespace LagLess
 
         public static void UpgradesPlease(PlayerController player)
         {
-            if (!LLConstants.dev || hasGivenUpgrades) return;
-            hasGivenUpgrades = true;
-
-
             flanne.Player.PlayerXP playerXP = player.GetComponentInChildren<flanne.Player.PlayerXP>();
             playerXP.level = 100;
 
