@@ -17,6 +17,7 @@ namespace LagLess
         public static int pickerupLayer = 23;
         public static int bulletLayer = 25;
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
+        public static bool dev = true;
     }
 
     public class LLControls
@@ -30,8 +31,6 @@ namespace LagLess
     public class LagLessPlugin : BaseUnityPlugin
     {
 
-        // Dev
-        static bool dev = true;
 
         public LagLessPlugin()
         {
