@@ -18,6 +18,7 @@ namespace LagLess
         public static int bulletLayer = 25;
         internal static BepInEx.Logging.ManualLogSource StaticLogger;
         public static bool dev = true;
+        public static bool enableOptimization = false;
     }
 
     public class LLControls
@@ -42,7 +43,10 @@ namespace LagLess
             LLConstants.StaticLogger = Logger;
 
             Harmony.CreateAndPatchAll(typeof(PlayerPatch));
-            Harmony.CreateAndPatchAll(typeof(ObjectPoolerPatch));
+            if (LLConstants.enableOptimization)
+            {
+                Harmony.CreateAndPatchAll(typeof(ObjectPoolerPatch));
+            }
         }
 
     }
