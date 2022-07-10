@@ -1,0 +1,1 @@
+NStrip.exe -p -cg Assembly-CSharp.dll
