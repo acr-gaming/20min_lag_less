@@ -33,11 +33,17 @@ namespace LagLess
 
         [HarmonyPatch("Update")]
         [HarmonyPostfix]
-        static void Update()
+        static void Update(PlayerController __instance)
         {
+
             if (UnityEngine.InputSystem.Keyboard.current.kKey.isPressed)
             {
-                LLConstants.StaticLogger.LogDebug("Key Pressed");
+                Juicer.SpawnExperience(1, __instance.transform.position, 10);
+            }
+
+            if (UnityEngine.InputSystem.Keyboard.current.jKey.isPressed)
+            {
+                Juicer.UpgradesPlease(__instance);
             }
 
         }
