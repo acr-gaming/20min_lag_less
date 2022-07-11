@@ -124,17 +124,36 @@ namespace LagLess
 
             if (toReturn.tag == "Pickup")
             {
-                toReturn.layer = LLConstants.pickupLayer;
                 flanne.Pickups.XPPickup xpPickup = toReturn.GetComponent<flanne.Pickups.XPPickup>();
                 if (xpPickup != null)
                 {
                     toReturn.AddComponent(typeof(LLXP));
                 }
+                toReturn.layer = LLLayers.pickupLayer;
+
+            }
+
+            if (toReturn.tag == "Pickup")
+            {
+                toReturn.layer = LLLayers.pickupLayer;
             }
             else if (toReturn.tag == "Bullet")
             {
-                toReturn.layer = LLConstants.bulletLayer;
+                toReturn.layer = LLLayers.bulletLayer;
             }
+            else if (toReturn.tag.StartsWith("Enemy"))
+            {
+                toReturn.layer = LLLayers.enemyLayer;
+            }
+
+            HarmfulOnContact contactHarm = toReturn.GetComponentInChildren<HarmfulOnContact>();
+
+            if (contactHarm != null && contactHarm.hitTag == "Enemy")
+            {
+                toReturn.layer = LLLayers.bulletExplosionLayer;
+            }
+
+
 
             return toReturn;
         }
@@ -152,7 +171,6 @@ namespace LagLess
             objectPools = new Dictionary<string, LLObjectPool>();
             foreach (var item in itemsToPool)
             {
-                LLConstants.Logger.LogDebug($"ObjectPoolerReplacement:: Adding item: {item.tag}");
                 addNewPool(item);
             }
         }
@@ -180,6 +198,7 @@ namespace LagLess
         private void addNewPool(ObjectPoolItem item)
         {
             LLObjectPool newPool = new LLObjectPool(item, baseTransform);
+            LLConstants.Logger.LogDebug($"ObjectPoolerReplacement:: Adding item: {item.tag}");
             objectPools.Add(item.tag, newPool);
         }
 

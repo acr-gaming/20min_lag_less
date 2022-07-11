@@ -69,7 +69,7 @@ namespace LagLess
         LLXP findXPToJoin()
         {
             Vector3 currentPosition = gameObject.transform.position;
-            Collider2D[] collisions = Physics2D.OverlapCircleAll(currentPosition, LLConstants.xpSelfPickupRadius, (1 << LLConstants.pickupLayer));
+            Collider2D[] collisions = Physics2D.OverlapCircleAll(currentPosition, LLConstants.xpSelfPickupRadius, (1 << LLLayers.pickupLayer));
 
             LLXP clostestTarget = null;
             float clostestTargetDistance = Mathf.Infinity;
