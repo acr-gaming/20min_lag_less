@@ -22,7 +22,6 @@ namespace LagLess
             Physics2D.IgnoreLayerCollision(0, LLConstants.pickerupLayer, true);
             Physics2D.IgnoreLayerCollision(LLConstants.pickerupLayer, LLConstants.pickerupLayer, true);
             Physics2D.IgnoreLayerCollision(LLConstants.pickupLayer, LLConstants.pickupLayer, true);
-            Physics2D.IgnoreLayerCollision(LLConstants.pickerupLayer, LLConstants.pickupLayer, false);
 
             // Bullets don't collide with themselves or pickups
             Physics2D.IgnoreLayerCollision(LLConstants.bulletLayer, LLConstants.bulletLayer, true);

@@ -10,218 +10,95 @@ using BepInEx.Configuration;
 
 namespace LagLess
 {
-
-    // [HarmonyPatch(typeof(flanne.Pickups.XPPickup))]
-    // public class SelfPickupPatch
-    // {
-    //     [HarmonyPatch("SetActive")]
-    //     [HarmonyPostfix]
-    //     static void OnEnable(flanne.Pickups.XPPickup __instance)
-    //     {
-    //         LLConstants.StaticLogger.LogInfo($"amnount {__instance.amount}");
-    //     }
-
-    //     [HarmonyPatch("UsePickup")]
-    //     [HarmonyPostfix]
-    //     static void UsePickup(flanne.Pickups.XPPickup __instance)
-    //     {
-    //         LLConstants.StaticLogger.LogInfo($"usePickup amnount {__instance.amount}");
-    //     }
-
-    // }
-
     public class LLXP : MonoBehaviour
     {
-        public float lastTimeActivated = 0;
-        public float originalXP;
-
-        private void OnTriggerStay2D(Collider2D other)
-        {
-            LLConstants.Logger.LogDebug($"other xp collision: {other.tag}");
-
-            GameObject otherGO = other.gameObject;
-            LLXP otherLLXP = otherGO.GetComponentInChildren<LLXP>();
-            flanne.Pickups.XPPickup otherXPPickup = otherGO.GetComponent<flanne.Pickups.XPPickup>();
-
-            GameObject thisGO = this.transform.parent.gameObject;
-            LLXP thisLLXP = thisGO.GetComponentInChildren<LLXP>();
-            flanne.Pickups.XPPickup thisXPPickup = thisGO.GetComponent<flanne.Pickups.XPPickup>();
-
-            // LLConstants.Logger.LogDebug($"other llxp: {otherLLXP}");
-            // LLConstants.Logger.LogDebug($"other otherxppick coroutine is null: {otherXPPickup.pickUpCoroutine == null}");
-            // LLConstants.Logger.LogDebug($"other active: {other.gameObject.activeInHierarchy}");
-            // LLConstants.Logger.LogDebug($"thiss active: {this.gameObject.activeInHierarchy}");
-
-            // LLConstants.Logger.LogDebug($"other active time: {otherLLXP.lastTimeActivated}");
-            // LLConstants.Logger.LogDebug($"this active time: {lastTimeActivated}");
-
-            if (otherXPPickup.pickUpCoroutine != null || thisXPPickup.pickUpCoroutine != null)
-            {
-                return;
-            }
-
-            // Unsure with multiple collisions if they will still fire?
-            if (!otherGO.activeInHierarchy || !thisGO.activeInHierarchy)
-            {
-                return;
-            }
-
-            // I have no idea why but for some reason they aren't getting bidirectionally collided??
-            if (otherLLXP.lastTimeActivated >= lastTimeActivated)
-            {
-                consumeOtherXP(otherGO);
-            }
-            else
-            {
-                otherLLXP.consumeOtherXP(thisGO);
-            }
-
-        }
-
-        public void consumeOtherXP(GameObject toConsume)
-        {
-            LLConstants.Logger.LogDebug("consuming other xp");
-            flanne.Pickups.XPPickup thisXPPickup = this.gameObject.GetComponentInParent<flanne.Pickups.XPPickup>();
-            flanne.Pickups.XPPickup otherXPPickup = toConsume.GetComponent<flanne.Pickups.XPPickup>();
-
-            thisXPPickup.amount += otherXPPickup.amount;
-
-            toConsume.SetActive(false);
-        }
-    }
-
-    public class LLXPUtils
-    {
-        static public GameObject CreateLLXPGameObject(flanne.Pickups.XPPickup xpPickup)
-        {
-            GameObject toReturn = new GameObject("LLXP", typeof(LLXP), typeof(CircleCollider2D), typeof(Rigidbody2D));
-            CircleCollider2D collider = toReturn.GetComponent<CircleCollider2D>();
-            LLXP llxp = toReturn.GetComponent<LLXP>();
-
-            llxp.originalXP = xpPickup.amount;
-            toReturn.layer = LLConstants.pickerupLayer;
-            collider.radius = LLConstants.xpSelfPickupRadius;
-
-            CircleCollider2D xpCollider = xpPickup.gameObject.GetComponent<CircleCollider2D>();
-
-            Physics2D.IgnoreCollision(collider, xpCollider, true);
-
-            return toReturn;
-        }
-
-        public static GameObject resetXPPickup(GameObject go)
-        {
-
-            return go;
-        }
-
-    }
-
-    public class EnableDisableXP : MonoBehaviour
-    {
-        void OnEnable()
-        {
-            GameObject go = this.gameObject;
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                transform.GetChild(i).gameObject.SetActive(true);
-            }
-
-            LLXP llxp = go.GetComponentInChildren<LLXP>();
-            go.GetComponent<CircleCollider2D>().enabled = true;
-            go.transform.Find("LLXP").gameObject.GetComponent<CircleCollider2D>().enabled = true;
-            flanne.Pickups.XPPickup xpPickup = go.GetComponent<flanne.Pickups.XPPickup>();
-            xpPickup.amount = llxp.originalXP;
-            llxp.lastTimeActivated = Time.time;
-        }
-        void OnDisable()
-        {
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                transform.GetChild(i).gameObject.SetActive(false);
-            }
-        }
-    }
-
-    public class EnableDisableXP2 : MonoBehaviour
-    {
         float originalXP;
+        int numExperience;
         flanne.Pickups.XPPickup thisXPPickup;
         static long globalAge = long.MaxValue;
         public long age;
-        bool alreadyMerging;
+        public bool hasBeenPickedUp;
 
-
-        void Awake()
-        {
-            thisXPPickup = gameObject.GetComponent<flanne.Pickups.XPPickup>();
-        }
         void OnEnable()
         {
+            thisXPPickup = this.gameObject.GetComponent<flanne.Pickups.XPPickup>();
 
             originalXP = thisXPPickup.amount;
             age = globalAge--;
-            gameObject.GetComponent<CircleCollider2D>().enabled = true;
-            alreadyMerging = false;
+            hasBeenPickedUp = false;
+            numExperience = 1;
 
-            Invoke("FindAndJoinAnotherXP", .2f);
+            Invoke("FindAndJoinAnotherXP", 1.5f);
+        }
+
+        void acceptMoreExperience(float amount)
+        {
+            thisXPPickup.amount += amount;
+            numExperience += 1;
+            float scaleFactor = Mathf.Min(1, thisXPPickup.amount * .05f) + Mathf.Min(1, thisXPPickup.amount * .01f) + Mathf.Min(1, thisXPPickup.amount * .001f);
+            gameObject.transform.localScale = new Vector3(1f + scaleFactor, 1f + scaleFactor, 1f + scaleFactor);
         }
 
         void FindAndJoinAnotherXP()
         {
-
-            EnableDisableXP2 xpToJoin = findXPToJoin();
-            if (xpToJoin)
+            if (hasBeenPickedUp == false)
             {
-                alreadyMerging = true;
-                JoinXP(xpToJoin);
+                LLXP xpToJoin = findXPToJoin();
+                if (xpToJoin)
+                {
+                    hasBeenPickedUp = true;
+                    JoinXP(xpToJoin);
+                }
             }
         }
 
-        void JoinXP(EnableDisableXP2 target)
+        void JoinXP(LLXP target)
         {
-            gameObject.GetComponent<CircleCollider2D>().enabled = false;
-            flanne.Pickups.XPPickup targetXPPickup = target.gameObject.GetComponent<flanne.Pickups.XPPickup>();
-            targetXPPickup.amount += thisXPPickup.amount;
-            LeanTween.move(gameObject, targetXPPickup.transform, 0.3f).setEase(LeanTweenType.easeInBack).setOnComplete(JoinXPDone);
+            target.acceptMoreExperience(thisXPPickup.amount);
+            thisXPPickup.amount = 0;
+            LeanTween.move(base.gameObject, target.gameObject.transform.position, 0.3f).setEase(LeanTweenType.easeInBounce).setOnComplete(JoinXPDone);
         }
 
         void JoinXPDone()
         {
+            thisXPPickup.transform.SetParent(ObjectPooler.SharedInstance.transform);
+            thisXPPickup.transform.localPosition = Vector3.zero;
             gameObject.SetActive(false);
         }
 
-        EnableDisableXP2 findXPToJoin()
+        LLXP findXPToJoin()
         {
-            Vector2 currentPosition = gameObject.transform.position;
+            Vector3 currentPosition = gameObject.transform.position;
             Collider2D[] collisions = Physics2D.OverlapCircleAll(currentPosition, LLConstants.xpSelfPickupRadius, (1 << LLConstants.pickupLayer));
-            LLConstants.Logger.LogDebug($"numcollisions:{collisions.Length}");
 
-            EnableDisableXP2 oldestInRange = this;
+            LLXP clostestTarget = null;
+            float clostestTargetDistance = Mathf.Infinity;
+
             foreach (Collider2D collision in collisions)
             {
-                EnableDisableXP2 otherEnableDisable = collision.gameObject.GetComponent<EnableDisableXP2>();
-                if (otherEnableDisable != null && otherEnableDisable.alreadyMerging == false)
+                LLXP otherEnableDisable = collision.gameObject.GetComponent<LLXP>();
+                if (
+                    otherEnableDisable != null &&
+                    otherEnableDisable.gameObject.activeInHierarchy &&
+                    otherEnableDisable.hasBeenPickedUp == false &&
+                    otherEnableDisable.age > this.age
+                )
                 {
-                    if (otherEnableDisable.age > oldestInRange.age)
+                    float distance = (collision.gameObject.transform.position - currentPosition).sqrMagnitude;
+                    if (distance < clostestTargetDistance)
                     {
-                        oldestInRange = otherEnableDisable;
+                        clostestTargetDistance = distance;
+                        clostestTarget = otherEnableDisable;
                     }
                 }
             }
 
-            if (oldestInRange == this)
-            {
-                return null;
-            }
-            else
-            {
-                return oldestInRange;
-            }
+            return clostestTarget;
         }
         void OnDisable()
         {
             thisXPPickup.amount = originalXP;
+            gameObject.transform.localScale = new Vector3(1, 1, 1);
         }
     }
 
@@ -233,16 +110,17 @@ namespace LagLess
         [HarmonyPrefix]
         static bool OnTriggerEnter2D(Collider2D other, flanne.Pickups.Pickup __instance)
         {
+            LLConstants.Logger.LogDebug($"PickupCollision: {other.tag}");
 
-            // disable colliders when being picked up does this actually guarentee no more collisions??
             if (other.tag == "Pickupper")
             {
-                LLConstants.Logger.LogDebug($"disabling collider");
-                __instance.gameObject.GetComponent<CircleCollider2D>().enabled = false;
+                LLXP llxp = __instance.gameObject.GetComponent<LLXP>();
+                if (llxp != null)
+                {
+                    if (llxp.hasBeenPickedUp) return false;
+                    llxp.hasBeenPickedUp = true;
+                }
             }
-
-            // dunno if needed?
-            if (!__instance.gameObject.activeInHierarchy) return false;
 
             return true;
         }

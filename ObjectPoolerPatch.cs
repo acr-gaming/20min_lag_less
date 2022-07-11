@@ -53,14 +53,12 @@ namespace LagLess
     public class LLObjectPool
     {
         List<GameObject> items;
-        int currentIndex;
+        int currentIndex = 0;
         ObjectPoolItem baseObject;
         Transform baseTransform;
-        Func<GameObject, GameObject> resetGOFunc = Identity<GameObject>.func;
 
-        public LLObjectPool(ObjectPoolItem inBaseObject, Transform inBaseTransform, Func<GameObject, GameObject> inResetGOFunc)
+        public LLObjectPool(ObjectPoolItem inBaseObject, Transform inBaseTransform)
         {
-            resetGOFunc = inResetGOFunc;
             baseTransform = inBaseTransform;
             baseObject = inBaseObject;
             items = createPoolItems(baseObject);
@@ -73,41 +71,37 @@ namespace LagLess
 
         public GameObject GetNext()
         {
-            GameObject toReturn = null;
 
             for (int i = currentIndex; i < items.Count; i++)
             {
                 if (!items[i].activeInHierarchy)
                 {
                     currentIndex = i + 1;
-                    toReturn = items[i];
+                    return items[i];
                 }
             }
 
-            if (toReturn == null)
+
+            for (int i = 0; i < currentIndex; i++)
             {
-                for (int i = 0; i < currentIndex; i++)
+                if (!items[i].activeInHierarchy)
                 {
-                    if (!items[i].activeInHierarchy)
-                    {
-                        currentIndex = i + 1;
-                        toReturn = items[i];
-                    }
+                    currentIndex = i + 1;
+                    return items[i];
                 }
             }
 
-            if (toReturn == null)
+
+
+            if (baseObject.shouldExpand)
             {
-                if (baseObject.shouldExpand)
-                {
-                    GameObject newItem = cloneBaseObject(baseObject);
-                    items.Add(newItem);
-                    currentIndex = 0;
-                    toReturn = newItem;
-                }
+                GameObject newItem = cloneBaseObject(baseObject);
+                items.Add(newItem);
+                return newItem;
             }
 
-            return resetGOFunc(toReturn);
+
+            return null;
         }
 
         private List<GameObject> createPoolItems(ObjectPoolItem baseObject)
@@ -134,11 +128,7 @@ namespace LagLess
                 flanne.Pickups.XPPickup xpPickup = toReturn.GetComponent<flanne.Pickups.XPPickup>();
                 if (xpPickup != null)
                 {
-                    //toReturn.AddComponent(typeof(Rigidbody2D));
-                    toReturn.AddComponent(typeof(EnableDisableXP2));
-                    // GameObject xpSelfPickerUpper = LLXPUtils.CreateLLXPGameObject(xpPickup);
-                    // xpSelfPickerUpper.transform.parent = toReturn.transform;
-                    // xpSelfPickerUpper.SetActive(value: false);
+                    toReturn.AddComponent(typeof(LLXP));
                 }
             }
             else if (toReturn.tag == "Bullet")
@@ -189,15 +179,7 @@ namespace LagLess
 
         private void addNewPool(ObjectPoolItem item)
         {
-            Func<GameObject, GameObject> resetGOFunc = Identity<GameObject>.func;
-            flanne.Pickups.XPPickup xpPickup = item.objectToPool.GetComponent<flanne.Pickups.XPPickup>();
-
-            if (xpPickup != null)
-            {
-                resetGOFunc = LLXPUtils.resetXPPickup;
-            }
-
-            LLObjectPool newPool = new LLObjectPool(item, baseTransform, resetGOFunc);
+            LLObjectPool newPool = new LLObjectPool(item, baseTransform);
             objectPools.Add(item.tag, newPool);
         }
 

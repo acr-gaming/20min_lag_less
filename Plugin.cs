@@ -17,7 +17,7 @@ namespace LagLess
         public static int pickupLayer = 24;
         public static int pickerupLayer = 23;
         public static int bulletLayer = 25;
-        public static float xpSelfPickupRadius = 1f;
+        public static float xpSelfPickupRadius = 1.5f;
         internal static BepInEx.Logging.ManualLogSource Logger;
     }
 
@@ -58,6 +58,7 @@ namespace LagLess
                 Harmony.CreateAndPatchAll(typeof(PlayerPatchJuice));
             }
 
+            Harmony.CreateAndPatchAll(typeof(SelfXPPickupPatch));
         }
 
     }
