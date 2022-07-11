@@ -22,6 +22,22 @@ namespace LagLess
 
                 {"SummonMastery", 5},
             };
+        public static readonly Dictionary<string, int> summonTest = new Dictionary<string, int>
+            {
+                {"DragonEgg", 1},
+
+                {"InSync", 1},
+                {"GhostFriend", 1},
+
+                {"MagicLens", 2},
+
+                {"LightWeaponry", 1},
+                {"HeavyWeaponry", 1},
+                {"DualWield", 1},
+
+                {"SummonMastery", 2},
+            };
+
 
         public static void SpawnExperience(int num, Vector2 location, int radius)
         {
@@ -51,6 +67,8 @@ namespace LagLess
             foreach (var powerupPoolItem in PowerupPoolItems)
             {
                 var powerup = powerupPoolItem.powerup;
+
+                LLConstants.Logger.LogDebug($"{powerup.name}");
 
                 if (wantedPowerUps.ContainsKey(powerup.name))
                 {
