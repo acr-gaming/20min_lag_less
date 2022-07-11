@@ -81,7 +81,6 @@ namespace LagLess
                 }
             }
 
-
             for (int i = 0; i < currentIndex; i++)
             {
                 if (!items[i].activeInHierarchy)
@@ -91,15 +90,12 @@ namespace LagLess
                 }
             }
 
-
-
             if (baseObject.shouldExpand)
             {
                 GameObject newItem = cloneBaseObject(baseObject);
                 items.Add(newItem);
                 return newItem;
             }
-
 
             return null;
         }
@@ -200,7 +196,11 @@ namespace LagLess
         private void addNewPool(ObjectPoolItem item)
         {
             LLObjectPool newPool = new LLObjectPool(item, baseTransform);
-            LLConstants.Logger.LogDebug($"ObjectPoolerReplacement:: Adding item: {item.tag}");
+            LLConstants.Logger.LogDebug($"ObjectPoolerReplacement:: Adding item: {item.tag} - isExpandable:{item.shouldExpand}");
+            if (item.tag == "LargeXP")
+            {
+                item.shouldExpand = true;
+            }
             objectPools.Add(item.tag, newPool);
         }
 
