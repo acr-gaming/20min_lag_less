@@ -146,14 +146,16 @@ namespace LagLess
                 toReturn.layer = LLLayers.enemyLayer;
             }
 
-            HarmfulOnContact contactHarm = toReturn.GetComponentInChildren<HarmfulOnContact>();
-
-            if (contactHarm != null && contactHarm.hitTag == "Enemy")
+            // Explosions maybe a better way to do this
+            if (toReturn.tag != "Bullet")
             {
-                toReturn.layer = LLLayers.bulletExplosionLayer;
+                HarmfulOnContact contactHarm = toReturn.GetComponentInChildren<HarmfulOnContact>();
+
+                if (contactHarm != null && contactHarm.hitTag == "Enemy")
+                {
+                    toReturn.layer = LLLayers.bulletExplosionLayer;
+                }
             }
-
-
 
             return toReturn;
         }

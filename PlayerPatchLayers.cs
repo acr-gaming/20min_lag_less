@@ -54,7 +54,7 @@ namespace LagLess
             // For lens so they collide with bullets only
             Physics2D.IgnoreLayerCollision(LLLayers.summonCollideOnlyBullet, LLLayers.bulletLayer, false);
 
-            // Bullets don't collide with themselves
+            // Bullets must collide with enemies
             Physics2D.IgnoreLayerCollision(LLLayers.bulletLayer, LLLayers.enemyLayer, false);
 
             // Explosions need to collider with player and enemies  
