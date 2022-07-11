@@ -15,12 +15,6 @@ namespace LagLess
         public static int enemyLayer = 27;
         public static int bulletExplosionLayer = 28;
 
-        public static readonly Dictionary<string, int> ghostPowerUps = new Dictionary<string, int>
-            {
-                {"Pickup", pickupLayer},
-                {"Bullet", bulletLayer},
-            };
-
     }
 
     [HarmonyPatch(typeof(PlayerController))]
@@ -96,11 +90,25 @@ namespace LagLess
         [HarmonyPostfix]
         static void Start(Summon __instance)
         {
-            LLConstants.Logger.LogDebug($"Summoning: {__instance.SummonTypeID}");
-            if (__instance.SummonTypeID == "MagicLens")
+            string summonType = __instance.SummonTypeID;
+            LLConstants.Logger.LogDebug($"Summoning: {summonType}");
+
+            switch (summonType)
             {
-                __instance.gameObject.layer = LLLayers.summonCollideOnlyBullet;
+                case "MagicLens":
+                    __instance.gameObject.layer = LLLayers.summonCollideOnlyBullet;
+                    break;
+                case "Knife":
+                    __instance.gameObject.layer = LLLayers.bulletLayer;
+                    break;
+                case "Scythe":
+                    __instance.gameObject.layer = LLLayers.bulletLayer;
+                    break;
+                default:
+                    break;
             }
+
+
         }
     }
 
