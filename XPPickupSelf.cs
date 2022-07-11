@@ -69,7 +69,8 @@ namespace LagLess
         LLXP findXPToJoin()
         {
             Vector3 currentPosition = gameObject.transform.position;
-            Collider2D[] collisions = Physics2D.OverlapCircleAll(currentPosition, LLConstants.xpSelfPickupRadius, (1 << LLLayers.pickupLayer));
+            float pickupRadius = LLConstants.xpSelfPickupRadius + LLConstants.xpSelfPickupRadius * UnityEngine.Random.value;
+            Collider2D[] collisions = Physics2D.OverlapCircleAll(currentPosition, pickupRadius, (1 << LLLayers.pickupLayer));
 
             LLXP clostestTarget = null;
             float clostestTargetDistance = Mathf.Infinity;
@@ -110,7 +111,6 @@ namespace LagLess
         [HarmonyPrefix]
         static bool OnTriggerEnter2D(Collider2D other, flanne.Pickups.Pickup __instance)
         {
-            LLConstants.Logger.LogDebug($"PickupCollision: {other.tag}");
 
             if (other.tag == "Pickupper")
             {

@@ -15,7 +15,7 @@ namespace LagLess
     public class LLConstants
     {
 
-        public static float xpSelfPickupRadius = 1.5f;
+        public static float xpSelfPickupRadius = 1f;
         internal static BepInEx.Logging.ManualLogSource Logger;
     }
 
@@ -35,7 +35,7 @@ namespace LagLess
     }
 
 
-    [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.2")]
+    [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.3")]
     public class LagLessPlugin : BaseUnityPlugin
     {
 
