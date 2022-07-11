@@ -1,5 +1,6 @@
 using HarmonyLib;
 using flanne;
+using System;
 
 using UnityEngine;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace LagLess
         {
             flanne.ObjectPooler.SharedInstance = __instance;
 
-            LLConstants.StaticLogger.LogDebug("Pooler Awake");
+            LLConstants.Logger.LogDebug("Pooler Awake");
             objectPoolReplacement = new ObjectPoolerReplacement(__instance.transform, __instance.itemsToPool);
             return false;
         }
@@ -55,9 +56,11 @@ namespace LagLess
         int currentIndex;
         ObjectPoolItem baseObject;
         Transform baseTransform;
+        Func<GameObject, GameObject> resetGOFunc = Identity<GameObject>.func;
 
-        public LLObjectPool(ObjectPoolItem inBaseObject, Transform inBaseTransform)
+        public LLObjectPool(ObjectPoolItem inBaseObject, Transform inBaseTransform, Func<GameObject, GameObject> inResetGOFunc)
         {
+            resetGOFunc = inResetGOFunc;
             baseTransform = inBaseTransform;
             baseObject = inBaseObject;
             items = createPoolItems(baseObject);
@@ -70,33 +73,41 @@ namespace LagLess
 
         public GameObject GetNext()
         {
+            GameObject toReturn = null;
+
             for (int i = currentIndex; i < items.Count; i++)
             {
                 if (!items[i].activeInHierarchy)
                 {
                     currentIndex = i + 1;
-                    return items[i];
+                    toReturn = items[i];
                 }
             }
 
-            for (int i = 0; i < currentIndex; i++)
+            if (toReturn == null)
             {
-                if (!items[i].activeInHierarchy)
+                for (int i = 0; i < currentIndex; i++)
                 {
-                    currentIndex = i + 1;
-                    return items[i];
+                    if (!items[i].activeInHierarchy)
+                    {
+                        currentIndex = i + 1;
+                        toReturn = items[i];
+                    }
                 }
             }
 
-            if (baseObject.shouldExpand)
+            if (toReturn == null)
             {
-                GameObject newItem = cloneBaseObject(baseObject);
-                items.Add(newItem);
-                currentIndex = 0;
-                return newItem;
+                if (baseObject.shouldExpand)
+                {
+                    GameObject newItem = cloneBaseObject(baseObject);
+                    items.Add(newItem);
+                    currentIndex = 0;
+                    toReturn = newItem;
+                }
             }
 
-            return null;
+            return resetGOFunc(toReturn);
         }
 
         private List<GameObject> createPoolItems(ObjectPoolItem baseObject)
@@ -111,15 +122,24 @@ namespace LagLess
             return toReturn;
         }
 
-        private GameObject cloneBaseObject(ObjectPoolItem baseObject)
+        private GameObject cloneBaseObject(ObjectPoolItem objectPoolItem)
         {
-            GameObject toReturn = UnityEngine.Object.Instantiate(baseObject.objectToPool);
+            GameObject toReturn = UnityEngine.Object.Instantiate(objectPoolItem.objectToPool);
             toReturn.SetActive(value: false);
             toReturn.transform.SetParent(baseTransform);
 
             if (toReturn.tag == "Pickup")
             {
                 toReturn.layer = LLConstants.pickupLayer;
+                flanne.Pickups.XPPickup xpPickup = toReturn.GetComponent<flanne.Pickups.XPPickup>();
+                if (xpPickup != null)
+                {
+                    //toReturn.AddComponent(typeof(Rigidbody2D));
+                    toReturn.AddComponent(typeof(EnableDisableXP2));
+                    // GameObject xpSelfPickerUpper = LLXPUtils.CreateLLXPGameObject(xpPickup);
+                    // xpSelfPickerUpper.transform.parent = toReturn.transform;
+                    // xpSelfPickerUpper.SetActive(value: false);
+                }
             }
             else if (toReturn.tag == "Bullet")
             {
@@ -142,7 +162,7 @@ namespace LagLess
             objectPools = new Dictionary<string, LLObjectPool>();
             foreach (var item in itemsToPool)
             {
-                LLConstants.StaticLogger.LogDebug($"ObjectPoolerReplacement:: Adding item: {item.tag}");
+                LLConstants.Logger.LogDebug($"ObjectPoolerReplacement:: Adding item: {item.tag}");
                 addNewPool(item);
             }
         }
@@ -169,7 +189,15 @@ namespace LagLess
 
         private void addNewPool(ObjectPoolItem item)
         {
-            LLObjectPool newPool = new LLObjectPool(item, baseTransform);
+            Func<GameObject, GameObject> resetGOFunc = Identity<GameObject>.func;
+            flanne.Pickups.XPPickup xpPickup = item.objectToPool.GetComponent<flanne.Pickups.XPPickup>();
+
+            if (xpPickup != null)
+            {
+                resetGOFunc = LLXPUtils.resetXPPickup;
+            }
+
+            LLObjectPool newPool = new LLObjectPool(item, baseTransform, resetGOFunc);
             objectPools.Add(item.tag, newPool);
         }
 

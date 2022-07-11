@@ -55,7 +55,7 @@ namespace LagLess
                 if (wantedPowerUps.ContainsKey(powerup.name))
                 {
                     int numUpgrades = wantedPowerUps[powerup.name];
-                    LLConstants.StaticLogger.LogDebug($"Applying: {powerup.name} - {numUpgrades} times.");
+                    LLConstants.Logger.LogDebug($"Applying: {powerup.name} - {numUpgrades} times.");
                     for (int i = 0; i < numUpgrades; i++)
                     {
                         powerup.ApplyAndNotify(player.gameObject);

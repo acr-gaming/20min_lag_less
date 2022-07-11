@@ -17,7 +17,8 @@ namespace LagLess
         public static int pickupLayer = 24;
         public static int pickerupLayer = 23;
         public static int bulletLayer = 25;
-        internal static BepInEx.Logging.ManualLogSource StaticLogger;
+        public static float xpSelfPickupRadius = 1f;
+        internal static BepInEx.Logging.ManualLogSource Logger;
     }
 
     public class LLConfigs
@@ -36,27 +37,27 @@ namespace LagLess
     }
 
 
-
-
     [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.2")]
     public class LagLessPlugin : BaseUnityPlugin
     {
 
         private void Awake()
         {
-            LLConstants.StaticLogger = Logger;
+            LLConstants.Logger = Logger;
             LLConfigs.initConfig(Config);
 
             if (LLConfigs.enableLayerOptimization.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(ObjectPoolerPatch));
                 Harmony.CreateAndPatchAll(typeof(PlayerPatchCollisionLayers));
+
             }
 
             if (LLConfigs.enableJuice.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(PlayerPatchJuice));
             }
+
         }
 
     }

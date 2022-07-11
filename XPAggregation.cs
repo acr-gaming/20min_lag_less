@@ -22,7 +22,7 @@ namespace LagLess
         [HarmonyPostfix]
         static void Start(PlayerController __instance)
         {
-            LLConstants.StaticLogger.LogDebug("start");
+            LLConstants.Logger.LogDebug("start");
 
             player = __instance;
 
@@ -34,12 +34,12 @@ namespace LagLess
         {
             while (true)
             {
-                LLConstants.StaticLogger.LogDebug("Running experience aggregation");
+                LLConstants.Logger.LogDebug("Running experience aggregation");
                 if (player)
                 {
                     Vector3 playerLocation = player.transform.position;
                     List<flanne.Pickups.XPPickup> xpPickups = getXPInRadius(playerLocation, 20);
-                    LLConstants.StaticLogger.LogDebug($"Found: {xpPickups.Count} xpPickups");
+                    LLConstants.Logger.LogDebug($"Found: {xpPickups.Count} xpPickups");
 
                 }
                 yield return new WaitForSeconds(2.0f);
@@ -50,7 +50,7 @@ namespace LagLess
         {
             int xpLayer = LLConfigs.enableLayerOptimization.Value ? LLConstants.pickupLayer : 0;
             Collider2D[] collisions = Physics2D.OverlapCircleAll(center, radius, (1 << xpLayer));
-            LLConstants.StaticLogger.LogDebug($"Found: {collisions.Length} collisons");
+            LLConstants.Logger.LogDebug($"Found: {collisions.Length} collisons");
 
             List<flanne.Pickups.XPPickup> toReturn = new List<flanne.Pickups.XPPickup>();
 
