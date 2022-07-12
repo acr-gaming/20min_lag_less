@@ -23,7 +23,6 @@ namespace LagLess
     {
         static public ConfigEntry<bool> enableJuice;
 
-
         static public void initConfig(ConfigFile config)
         {
             enableJuice = config.Bind("General", "Enable Juice", false, "For dev - spawns experience with k and specific laggy upgrades with j.");
