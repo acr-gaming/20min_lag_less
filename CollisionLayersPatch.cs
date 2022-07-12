@@ -8,6 +8,7 @@ namespace LagLess
 {
     public class LLLayers
     {
+        // TODO: Probably should do enemy projectiles as well?
         public static readonly int pickerupLayer = 23;
         public static readonly int pickupLayer = 24;
         public static readonly int bulletLayer = 25;
@@ -15,6 +16,14 @@ namespace LagLess
         public static readonly int summonCollideOnlyBullet = 27;
         public static readonly int enemyLayer = 28;
 
+        public static void ChangeLayersRecursively(Transform transform, int layer)
+        {
+            transform.gameObject.layer = layer;
+            foreach (Transform child in transform)
+            {
+                ChangeLayersRecursively(child, layer);
+            }
+        }
 
         public static void setPooledObjectLayer(GameObject objectToPool)
         {
@@ -36,7 +45,7 @@ namespace LagLess
                 HarmfulOnContact contactHarm = objectToPool.GetComponentInChildren<HarmfulOnContact>();
                 if (contactHarm && contactHarm.hitTag == "Enemy")
                 {
-                    objectToPool.layer = LLLayers.bulletExplosionLayer;
+                    ChangeLayersRecursively(objectToPool.transform, LLLayers.bulletExplosionLayer);
                 }
             }
         }
@@ -127,8 +136,6 @@ namespace LagLess
         static void Start(Summon __instance)
         {
             string summonType = __instance.SummonTypeID;
-            LLConstants.Logger.LogDebug($"Summoning: {summonType}");
-
             switch (summonType)
             {
                 case "MagicLens":
@@ -140,10 +147,12 @@ namespace LagLess
                 case "Scythe":
                     __instance.gameObject.layer = LLLayers.bulletLayer;
                     break;
+                case "Spirit":
+                    __instance.gameObject.layer = LLLayers.bulletLayer;
+                    break;
                 default:
                     break;
             }
         }
     }
-
 }

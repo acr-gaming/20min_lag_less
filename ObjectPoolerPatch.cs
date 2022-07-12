@@ -78,7 +78,7 @@ namespace LagLess
 
         private void addNewPool(ObjectPoolItem item)
         {
-            LLConstants.Logger.LogDebug($"OPR::addNewPool: {item.tag}");
+            LLConstants.Logger.LogDebug($"OPR::addNewPool: {item.tag} | shouldExpand: {item.shouldExpand}");
 
             // Honestly not even sure these are used? Don't want them spawning outside of pooler though.
             if (item.tag == "LargeXP")
@@ -107,10 +107,7 @@ namespace LagLess
             items = createPoolItems(baseObject);
         }
 
-        public List<GameObject> GetAll()
-        {
-            return items;
-        }
+        public List<GameObject> GetAll() => items;
 
         // TODO: Think about having seperate active/inactive lists/arrays.
         public GameObject GetNext()

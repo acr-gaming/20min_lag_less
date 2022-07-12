@@ -18,7 +18,11 @@
     --> lagless20min.csproj
     ...
 ```
-Unity.InputSystem.dll and Assembly-CSharp are in `C:\Program Files (x86)\Steam\steamapps\common\20MinuteTillDawn\MinutesTillDawn_Data\Managed` **probably, depends where your steam is installed.
+Unity.InputSystem.dll and Assembly-CSharp are in 
+
+`C:\Program Files (x86)\Steam\steamapps\common\20MinuteTillDawn\MinutesTillDawn_Data\Managed` 
+
+**probably, depends where your steam is installed.
 
 ## 2. Download NStrip and move NStrip.exe into lib folder
 https://github.com/BepInEx/NStrip

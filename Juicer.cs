@@ -6,22 +6,28 @@ using System.Collections.Generic;
 
 namespace LagLess
 {
-
     class Juicer
     {
-
         public static readonly Dictionary<string, int> ghostPowerUps = new Dictionary<string, int>
             {
-                {"GhostFriend", 5},
+                {"GhostFriend", 6},
                 {"InSync", 5},
-                {"VengefulGhost", 5},
+                {"VengefulGhost", 6},
                 {"EnergeticFriends", 5},
 
                 {"MagicLens", 5},
                 {"FocalPoint", 1},
 
-                {"SummonMastery", 5},
+                {"SummonMastery", 10},
+
+                {"Frostbite", 6},
+                {"FrostMagic", 2},
+                {"Shatter", 2},
+
+                {"Vitality", 5},
+                {"Regeneration", 5},
             };
+
         public static readonly Dictionary<string, int> summonTest = new Dictionary<string, int>
             {
                 {"DragonEgg", 1},
@@ -36,6 +42,27 @@ namespace LagLess
                 {"DualWield", 1},
 
                 {"SummonMastery", 2},
+            };
+
+        public static readonly Dictionary<string, int> littleBitOfEverythingElse = new Dictionary<string, int>
+            {
+                {"BigShot", 1},
+                {"Splinter", 1},
+                {"GhostFriend", 1},
+                {"RubberBullets", 1},
+                {"HolyShield", 1},
+                {"StalwartShield", 1},
+                {"ElectroMage", 1},
+                {"ElectroBug", 1},
+                {"ElectroMastery", 1},
+                {"Energized", 1},
+                {"IntenseBurn", 1},
+                {"PyroMage", 1},
+                {"Shatter", 1},
+                {"FrostMagic", 1},
+                {"MagicLens", 1},
+                {"FrostFire", 1},
+                {"Overload", 1},
             };
 
 
@@ -59,8 +86,6 @@ namespace LagLess
 
         public static void UpgradesPlease(PlayerController player, Dictionary<string, int> wantedPowerUps)
         {
-
-
             PowerupGenerator powerupGenerator = flanne.PowerupGenerator.Instance;
             List<PowerupPoolItem> PowerupPoolItems = powerupGenerator.powerupPool;
 
@@ -81,6 +106,6 @@ namespace LagLess
                 }
             }
         }
-    }
 
+    }
 }
