@@ -31,7 +31,7 @@ namespace LagLess
             if (needsUpgrades && UnityEngine.InputSystem.Keyboard.current.jKey.isPressed)
             {
                 needsUpgrades = false;
-                Juicer.UpgradesPlease(__instance, Juicer.summonTest);
+                Juicer.UpgradesPlease(__instance, Juicer.ghostPowerUps);
                 Juicer.SetPlayerLevel(__instance);
             }
 

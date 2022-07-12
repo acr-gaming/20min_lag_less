@@ -8,17 +8,43 @@ namespace LagLess
 {
     public class LLLayers
     {
-        public static int pickerupLayer = 23;
-        public static int pickupLayer = 24;
-        public static int bulletLayer = 25;
-        public static int summonCollideOnlyBullet = 26;
-        public static int enemyLayer = 27;
-        public static int bulletExplosionLayer = 28;
+        public static readonly int pickerupLayer = 23;
+        public static readonly int pickupLayer = 24;
+        public static readonly int bulletLayer = 25;
+        public static readonly int bulletExplosionLayer = 26;
+        public static readonly int summonCollideOnlyBullet = 27;
+        public static readonly int enemyLayer = 28;
 
+
+        public static void setPooledObjectLayer(GameObject objectToPool)
+        {
+            if (objectToPool.tag == "Pickup")
+            {
+                objectToPool.layer = LLLayers.pickupLayer;
+            }
+            else if (objectToPool.tag == "Bullet")
+            {
+                objectToPool.layer = LLLayers.bulletLayer;
+            }
+            else if (objectToPool.tag.StartsWith("Enemy"))
+            {
+                objectToPool.layer = LLLayers.enemyLayer;
+            }
+            else
+            {
+                // Explosions 
+                HarmfulOnContact contactHarm = objectToPool.GetComponentInChildren<HarmfulOnContact>();
+                if (contactHarm && contactHarm.hitTag == "Enemy")
+                {
+                    objectToPool.layer = LLLayers.bulletExplosionLayer;
+                }
+            }
+        }
     }
 
+    // TODO: Move somewhere else?
     [HarmonyPatch(typeof(PlayerController))]
-    public class PlayerPatchCollisionLayers : MonoBehaviour
+    public class CollisionLayersPatch : MonoBehaviour
     {
 
         [HarmonyPatch("Start")]
@@ -27,10 +53,23 @@ namespace LagLess
         {
             LLConstants.Logger.LogDebug("PlayerController Started");
 
-            // There is some weird fog system that doesnt' really seem to get used but is still around
+            // There is some fog system that doesn't seem to get used but is still exists
             Camera cam = Camera.main;
-            cam.cullingMask = cam.cullingMask | (1 << LLLayers.enemyLayer) | (1 << LLLayers.summonCollideOnlyBullet) | (1 << LLLayers.bulletLayer) | (1 << LLLayers.bulletExplosionLayer);
+            cam.cullingMask =
+                cam.cullingMask
+                    | (1 << LLLayers.enemyLayer)
+                    | (1 << LLLayers.summonCollideOnlyBullet)
+                    | (1 << LLLayers.bulletLayer)
+                    | (1 << LLLayers.bulletExplosionLayer);
 
+            GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
+            PickerUpper.layer = LLLayers.pickerupLayer;
+
+            setupLayers();
+        }
+
+        static void setupLayers()
+        {
             // Clear collisions
             for (int i = 0; i < 32; i++)
             {
@@ -58,11 +97,8 @@ namespace LagLess
             // I think enemys need to collide?
             Physics2D.IgnoreLayerCollision(LLLayers.enemyLayer, LLLayers.enemyLayer, false);
 
-            // TODO: remove this - but I think too much stuff for now - maybe enough other stuff moved out it doesn't matter
+            // TODO: is this worth removing? not sure how much is left
             Physics2D.IgnoreLayerCollision(0, LLLayers.enemyLayer, false);
-
-            GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
-            PickerUpper.layer = LLLayers.pickerupLayer;
         }
     }
 
@@ -70,7 +106,7 @@ namespace LagLess
     [HarmonyPatch(typeof(AIComponent))]
     public class EnemyLayersPatch
     {
-
+        // Needs to be done here because the trees don't get pooled
         [HarmonyPatch("Start")]
         [HarmonyPostfix]
         static void Start(Summon __instance)
@@ -85,7 +121,7 @@ namespace LagLess
     [HarmonyPatch(typeof(Summon))]
     public class SummonLayersPatch
     {
-
+        // TOOD: dragon/ghost? not sure they even have colliders
         [HarmonyPatch("Start")]
         [HarmonyPostfix]
         static void Start(Summon __instance)
@@ -107,8 +143,6 @@ namespace LagLess
                 default:
                     break;
             }
-
-
         }
     }
 

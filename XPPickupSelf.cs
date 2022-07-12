@@ -7,106 +7,103 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using BepInEx.Configuration;
+using System.Collections;
 
 namespace LagLess
 {
-    public class LLXP : MonoBehaviour
+    public class LLXPComponent : MonoBehaviour
     {
-        float originalXP;
-        int numExperience;
+        float defaultExperienceAmount;
+        public int extraExperienceCollected;
         flanne.Pickups.XPPickup thisXPPickup;
-        static long globalAge = long.MaxValue;
-        public long age;
-        public bool hasBeenPickedUp;
+        public bool hasBeenPickedUp = false;
+
+        void Awake()
+        {
+            thisXPPickup = this.gameObject.GetComponent<flanne.Pickups.XPPickup>();
+            defaultExperienceAmount = thisXPPickup.amount;
+        }
 
         void OnEnable()
         {
-            thisXPPickup = this.gameObject.GetComponent<flanne.Pickups.XPPickup>();
-
-            originalXP = thisXPPickup.amount;
-            age = globalAge--;
             hasBeenPickedUp = false;
-            numExperience = 1;
+            extraExperienceCollected = 0;
+            thisXPPickup.amount = defaultExperienceAmount;
+            gameObject.transform.localScale = new Vector3(1, 1, 1);
 
-            Invoke("FindAndJoinAnotherXP", 1.5f);
+            StartCoroutine(FindAndJoinAnotherXP());
         }
 
-        void acceptMoreExperience(float amount)
+        void acceptMoreExperience(float amount, int extraExperienceCollected)
         {
             thisXPPickup.amount += amount;
-            numExperience += 1;
-            float scaleFactor = Mathf.Min(1, thisXPPickup.amount * .05f) + Mathf.Min(1, thisXPPickup.amount * .01f) + Mathf.Min(1, thisXPPickup.amount * .001f);
+            this.extraExperienceCollected += extraExperienceCollected + 1;
+            float scaleFactor = Mathf.Min(1, thisXPPickup.amount * .05f) + Mathf.Min(1, thisXPPickup.amount * .02f) + Mathf.Min(1, thisXPPickup.amount * .005f);
             gameObject.transform.localScale = new Vector3(1f + scaleFactor, 1f + scaleFactor, 1f + scaleFactor);
         }
 
-        void FindAndJoinAnotherXP()
+        IEnumerator FindAndJoinAnotherXP()
         {
-            if (hasBeenPickedUp == false)
-            {
-                LLXP xpToJoin = findXPToJoin();
-                if (xpToJoin)
-                {
-                    hasBeenPickedUp = true;
-                    JoinXP(xpToJoin);
-                }
-            }
-        }
+            yield return new WaitForSeconds(1.5f);
+            if (hasBeenPickedUp) yield break;
 
-        void JoinXP(LLXP target)
-        {
-            target.acceptMoreExperience(thisXPPickup.amount);
-            thisXPPickup.amount = 0;
-            LeanTween.move(base.gameObject, target.gameObject.transform.position, 0.3f).setEase(LeanTweenType.easeInBounce).setOnComplete(JoinXPDone);
+            LLXPComponent xpToJoin = findXPToJoin();
+            if (xpToJoin)
+            {
+                hasBeenPickedUp = true;
+                xpToJoin.acceptMoreExperience(thisXPPickup.amount, extraExperienceCollected);
+                thisXPPickup.amount = 0;
+                LeanTween.move(gameObject, xpToJoin.transform.position, 0.3f).setEase(LeanTweenType.easeInBounce).setOnComplete(JoinXPDone);
+            }
+
         }
 
         void JoinXPDone()
         {
-            thisXPPickup.transform.SetParent(ObjectPooler.SharedInstance.transform);
-            thisXPPickup.transform.localPosition = Vector3.zero;
+            gameObject.transform.SetParent(ObjectPooler.SharedInstance.transform);
+            gameObject.transform.localPosition = Vector3.zero;
             gameObject.SetActive(false);
         }
 
-        LLXP findXPToJoin()
+        LLXPComponent findXPToJoin()
         {
             Vector3 currentPosition = gameObject.transform.position;
             float pickupRadius = LLConstants.xpSelfPickupRadius + LLConstants.xpSelfPickupRadius * UnityEngine.Random.value;
             Collider2D[] collisions = Physics2D.OverlapCircleAll(currentPosition, pickupRadius, (1 << LLLayers.pickupLayer));
 
-            LLXP clostestTarget = null;
+            LLXPComponent clostestTarget = null;
             float clostestTargetDistance = Mathf.Infinity;
 
             foreach (Collider2D collision in collisions)
             {
-                LLXP otherEnableDisable = collision.gameObject.GetComponent<LLXP>();
+                LLXPComponent otherLLXP = collision.gameObject.GetComponent<LLXPComponent>();
                 if (
-                    otherEnableDisable != null &&
-                    otherEnableDisable.gameObject.activeInHierarchy &&
-                    otherEnableDisable.hasBeenPickedUp == false &&
-                    otherEnableDisable.age > this.age
+                    otherLLXP &&
+                    otherLLXP != this &&
+                    otherLLXP.hasBeenPickedUp == false
                 )
                 {
-                    float distance = (collision.gameObject.transform.position - currentPosition).sqrMagnitude;
+                    float distance = (otherLLXP.gameObject.transform.position - currentPosition).sqrMagnitude;
                     if (distance < clostestTargetDistance)
                     {
                         clostestTargetDistance = distance;
-                        clostestTarget = otherEnableDisable;
+                        clostestTarget = otherLLXP;
                     }
                 }
             }
 
             return clostestTarget;
         }
+
         void OnDisable()
         {
-            thisXPPickup.amount = originalXP;
-            gameObject.transform.localScale = new Vector3(1, 1, 1);
+            StopAllCoroutines();
         }
     }
 
     [HarmonyPatch(typeof(flanne.Pickups.Pickup))]
     public class SelfXPPickupPatch
     {
-
         [HarmonyPatch("OnTriggerEnter2D")]
         [HarmonyPrefix]
         static bool OnTriggerEnter2D(Collider2D other, flanne.Pickups.Pickup __instance)
@@ -114,16 +111,35 @@ namespace LagLess
 
             if (other.tag == "Pickupper")
             {
-                LLXP llxp = __instance.gameObject.GetComponent<LLXP>();
-                if (llxp != null)
+                LLXPComponent llxp = __instance.gameObject.GetComponent<LLXPComponent>();
+                if (llxp)
                 {
                     if (llxp.hasBeenPickedUp) return false;
                     llxp.hasBeenPickedUp = true;
                 }
             }
+            else
+            {
+                LLConstants.Logger.LogError($"Pickup collided with something other than pickerupper with tag: {other.tag}");
+            }
 
             return true;
         }
+    }
 
+    [HarmonyPatch(typeof(flanne.Pickups.XPPickup))]
+    public class XPPickupPatch
+    {
+        [HarmonyPatch("UsePickup")]
+        [HarmonyPostfix]
+        static void UsePickup(flanne.Pickups.XPPickup __instance)
+        {
+            LLXPComponent llxp = __instance.gameObject.GetComponent<LLXPComponent>();
+
+            for (int i = 0; i < llxp.extraExperienceCollected; i++)
+            {
+                __instance.PostNotification(flanne.Pickups.XPPickup.XPPickupEvent, null);
+            }
+        }
     }
 }

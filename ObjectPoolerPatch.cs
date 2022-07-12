@@ -10,19 +10,18 @@ namespace LagLess
     [HarmonyPatch(typeof(flanne.ObjectPooler))]
     public class ObjectPoolerPatch
     {
-        static ObjectPoolerReplacement objectPoolReplacement;
+        static LLObjectPooler objectPoolReplacement;
 
         [HarmonyPatch("Awake")]
         [HarmonyPrefix]
         static bool Awake(flanne.ObjectPooler __instance)
         {
+            LLConstants.Logger.LogDebug("Pooler Awake");
+            objectPoolReplacement = new LLObjectPooler(__instance.transform, __instance.itemsToPool);
             flanne.ObjectPooler.SharedInstance = __instance;
 
-            LLConstants.Logger.LogDebug("Pooler Awake");
-            objectPoolReplacement = new ObjectPoolerReplacement(__instance.transform, __instance.itemsToPool);
             return false;
         }
-
 
         [HarmonyPatch("GetPooledObject")]
         [HarmonyPrefix]
@@ -47,8 +46,52 @@ namespace LagLess
             objectPoolReplacement.AddObject(tag, GO, amt, exp);
             return false;
         }
+    }
+
+    public class LLObjectPooler
+    {
+        Dictionary<string, LLObjectPool> objectPools;
+        Transform baseTransform;
+
+        public LLObjectPooler(Transform inBaseTransform, List<ObjectPoolItem> itemsToPool)
+        {
+            baseTransform = inBaseTransform;
+            objectPools = new Dictionary<string, LLObjectPool>();
+            foreach (var item in itemsToPool)
+            {
+                addNewPool(item);
+            }
+        }
+
+        public void AddObject(string tag, GameObject GO, int amt = 3, bool exp = true)
+        {
+            if (!objectPools.ContainsKey(tag))
+            {
+                ObjectPoolItem item = new ObjectPoolItem(tag, GO, amt, exp);
+                addNewPool(item);
+            }
+        }
+
+        public List<GameObject> GetAllPooledObjects(string tag) => objectPools[tag].GetAll();
+
+        public GameObject GetPooledObject(string tag) => objectPools[tag].GetNext();
+
+        private void addNewPool(ObjectPoolItem item)
+        {
+            LLConstants.Logger.LogDebug($"OPR::addNewPool: {item.tag}");
+
+            // Honestly not even sure these are used? Don't want them spawning outside of pooler though.
+            if (item.tag == "LargeXP")
+            {
+                item.shouldExpand = true;
+            }
+
+            LLObjectPool newPool = new LLObjectPool(item, baseTransform);
+            objectPools.Add(item.tag, newPool);
+        }
 
     }
+
 
     public class LLObjectPool
     {
@@ -69,6 +112,7 @@ namespace LagLess
             return items;
         }
 
+        // TODO: Think about having seperate active/inactive lists/arrays.
         public GameObject GetNext()
         {
 
@@ -121,87 +165,15 @@ namespace LagLess
             if (toReturn.tag == "Pickup")
             {
                 flanne.Pickups.XPPickup xpPickup = toReturn.GetComponent<flanne.Pickups.XPPickup>();
-                if (xpPickup != null)
+                if (xpPickup)
                 {
-                    toReturn.AddComponent(typeof(LLXP));
-                }
-                toReturn.layer = LLLayers.pickupLayer;
-
-            }
-
-            if (toReturn.tag == "Pickup")
-            {
-                toReturn.layer = LLLayers.pickupLayer;
-            }
-            else if (toReturn.tag == "Bullet")
-            {
-                toReturn.layer = LLLayers.bulletLayer;
-            }
-            else if (toReturn.tag.StartsWith("Enemy"))
-            {
-                toReturn.layer = LLLayers.enemyLayer;
-            }
-
-            // Explosions maybe a better way to do this
-            if (toReturn.tag != "Bullet")
-            {
-                HarmfulOnContact contactHarm = toReturn.GetComponentInChildren<HarmfulOnContact>();
-
-                if (contactHarm != null && contactHarm.hitTag == "Enemy")
-                {
-                    toReturn.layer = LLLayers.bulletExplosionLayer;
+                    toReturn.AddComponent(typeof(LLXPComponent));
                 }
             }
+
+            LLLayers.setPooledObjectLayer(toReturn);
 
             return toReturn;
-        }
-
-    }
-
-    public class ObjectPoolerReplacement
-    {
-        Dictionary<string, LLObjectPool> objectPools;
-        Transform baseTransform;
-
-        public ObjectPoolerReplacement(Transform inBaseTransform, List<ObjectPoolItem> itemsToPool)
-        {
-            baseTransform = inBaseTransform;
-            objectPools = new Dictionary<string, LLObjectPool>();
-            foreach (var item in itemsToPool)
-            {
-                addNewPool(item);
-            }
-        }
-
-        public void AddObject(string tag, GameObject GO, int amt = 3, bool exp = true)
-        {
-            if (!objectPools.ContainsKey(tag))
-            {
-
-                ObjectPoolItem item = new ObjectPoolItem(tag, GO, amt, exp);
-                addNewPool(item);
-            }
-        }
-
-        public List<GameObject> GetAllPooledObjects(string tag)
-        {
-            return objectPools[tag].GetAll();
-        }
-
-        public GameObject GetPooledObject(string tag)
-        {
-            return objectPools[tag].GetNext();
-        }
-
-        private void addNewPool(ObjectPoolItem item)
-        {
-            LLObjectPool newPool = new LLObjectPool(item, baseTransform);
-            LLConstants.Logger.LogDebug($"ObjectPoolerReplacement:: Adding item: {item.tag} - isExpandable:{item.shouldExpand}");
-            if (item.tag == "LargeXP")
-            {
-                item.shouldExpand = true;
-            }
-            objectPools.Add(item.tag, newPool);
         }
 
     }
