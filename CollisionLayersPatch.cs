@@ -21,7 +21,11 @@ namespace LagLess
             transform.gameObject.layer = layer;
             foreach (Transform child in transform)
             {
-                ChangeLayersRecursively(child, layer);
+                if (!child.gameObject.name.StartsWith("FogReveal"))
+                {
+                    ChangeLayersRecursively(child, layer);
+
+                }
             }
         }
 
