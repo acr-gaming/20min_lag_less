@@ -52,7 +52,6 @@ namespace LagLess
             {
                 hasBeenPickedUp = true;
                 xpToJoin.acceptMoreExperience(thisXPPickup.amount, extraExperienceCollected);
-                thisXPPickup.amount = 0;
                 LeanTween.move(gameObject, xpToJoin.transform.position, 0.3f).setEase(LeanTweenType.easeInBounce).setOnComplete(JoinXPDone);
             }
 
