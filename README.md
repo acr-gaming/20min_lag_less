@@ -37,6 +37,9 @@ in terminal in lib folder. Then you can delete the original `Assembly-CSharp.dll
 
 ## 4. Enable/Disable Dev Stuff
 
-ATM `Plugins.cs` has `LLConstants` that control turning some stuff off and on. If you enable dev `k` spawns experience and `j` will give you a bunch of upgrades designed to be laggy for testing.
+ If you enable juice `k` spawns experience and `j` will give you a bunch of upgrades designed to be laggy for testing.
 
 
+## 5. Releasing new version
+
+- thunderstore manifest has version as well

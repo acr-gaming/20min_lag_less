@@ -54,7 +54,6 @@ namespace LagLess
                 xpToJoin.acceptMoreExperience(thisXPPickup.amount, extraExperienceCollected);
                 LeanTween.move(gameObject, xpToJoin.transform.position, 0.3f).setEase(LeanTweenType.easeInBounce).setOnComplete(JoinXPDone);
             }
-
         }
 
         void JoinXPDone()
@@ -107,7 +106,6 @@ namespace LagLess
         [HarmonyPrefix]
         static bool OnTriggerEnter2D(Collider2D other, flanne.Pickups.Pickup __instance)
         {
-
             if (other.tag == "Pickupper")
             {
                 LLXPComponent llxp = __instance.gameObject.GetComponent<LLXPComponent>();
