@@ -41,7 +41,9 @@ namespace LagLess
             }
             else
             {
-                // Explosions 
+                // Explosions - 
+                // TODO: this is a bit overly broad - bunch of stuff that only hits enemies in here
+                // but in same collision layer as grenades(that also hit players)
                 HarmfulOnContact contactHarm = objectToPool.GetComponentInChildren<HarmfulOnContact>();
                 if (contactHarm && contactHarm.hitTag == "Enemy")
                 {
