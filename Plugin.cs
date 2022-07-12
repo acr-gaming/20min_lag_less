@@ -30,7 +30,7 @@ namespace LagLess
     }
 
 
-    [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.0.3")]
+    [BepInPlugin("acr.20mintilldawn.lagless", "Lag Minus Minus", "0.1.0")]
     public class LagLessPlugin : BaseUnityPlugin
     {
 
