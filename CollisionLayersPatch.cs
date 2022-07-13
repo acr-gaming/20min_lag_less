@@ -83,6 +83,8 @@ namespace LagLess
                     | (1 << LLLayers.summonCollideOnlyBullet)
                     | (1 << LLLayers.bulletLayer)
                     | (1 << LLLayers.bulletExplosionLayer);
+                    | (1 << LLLayers.pickerupLayer);
+
 
             GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
             PickerUpper.layer = LLLayers.pickerupLayer;

@@ -42,6 +42,8 @@ namespace LagLess
                 {"DualWield", 1},
 
                 {"SummonMastery", 2},
+                {"buddy_name", 2},
+                {"buddy_two_name", 1}
             };
 
         public static readonly Dictionary<string, int> littleBitOfEverythingElse = new Dictionary<string, int>
@@ -94,13 +96,14 @@ namespace LagLess
                 var powerup = powerupPoolItem.powerup;
 
                 LLConstants.Logger.LogDebug($"{powerup.name}");
-                LLConstants.Logger.LogDebug($"nameStringID: {powerup.nameStringID}");
+                LLConstants.Logger.LogDebug($"nameStringID: {powerup.nameStringID.key}");
 
 
                 if (wantedPowerUps.ContainsKey(powerup.name) || wantedPowerUps.ContainsKey(powerup.nameStringID.key))
                 {
-                    int numUpgrades = wantedPowerUps[powerup.name];
-                    LLConstants.Logger.LogDebug($"Applying: {powerup.name} - {numUpgrades} times.");
+                    string powerUpKey = powerup.name.Length > 0 ? powerup.name : powerup.nameStringID.key;
+                    int numUpgrades = wantedPowerUps[powerUpKey];
+                    LLConstants.Logger.LogDebug($"Applying: {powerUpKey} - {numUpgrades} times.");
                     for (int i = 0; i < numUpgrades; i++)
                     {
                         powerup.ApplyAndNotify(player.gameObject);
