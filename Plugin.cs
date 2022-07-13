@@ -42,8 +42,6 @@ namespace LagLess
             Harmony.CreateAndPatchAll(typeof(ModPowerUpFixPatch));
             Harmony.CreateAndPatchAll(typeof(ModStartFixPatch));
 
-
-
             if (LLConfigs.enableJuice.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(PlayerPatchJuice));

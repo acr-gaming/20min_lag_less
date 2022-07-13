@@ -23,7 +23,7 @@ namespace LagLess
         static void Update(PlayerController __instance)
         {
 
-            if (UnityEngine.InputSystem.Keyboard.current.kKey.isPressed)
+            if (UnityEngine.InputSystem.Keyboard.current.kKey.isPressed && !flanne.Core.PauseController.isPaused)
             {
                 Juicer.SpawnExperience(2, __instance.transform.position, 15);
             }
