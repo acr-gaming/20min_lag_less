@@ -94,8 +94,10 @@ namespace LagLess
                 var powerup = powerupPoolItem.powerup;
 
                 LLConstants.Logger.LogDebug($"{powerup.name}");
+                LLConstants.Logger.LogDebug($"nameStringID: {powerup.nameStringID}");
 
-                if (wantedPowerUps.ContainsKey(powerup.name))
+
+                if (wantedPowerUps.ContainsKey(powerup.name) || wantedPowerUps.ContainsKey(powerup.nameStringID.key))
                 {
                     int numUpgrades = wantedPowerUps[powerup.name];
                     LLConstants.Logger.LogDebug($"Applying: {powerup.name} - {numUpgrades} times.");

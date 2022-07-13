@@ -49,6 +49,7 @@ namespace LagLess
             if (xpToJoin)
             {
                 flanneXP.pickUpCoroutine = JoinXP(xpToJoin);
+                StartCoroutine(flanneXP.pickUpCoroutine);
             }
         }
 
@@ -58,7 +59,6 @@ namespace LagLess
             int tweenID = LeanTween.move(gameObject, xpToJoin.transform.position, 0.3f).setEase(LeanTweenType.easeInBounce).id;
 
             while (LeanTween.isTweening(tweenID))
-
             {
                 yield return null;
             }

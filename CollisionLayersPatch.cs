@@ -16,6 +16,13 @@ namespace LagLess
         public static readonly int summonCollideOnlyBullet = 27;
         public static readonly int enemyLayer = 28;
 
+        public static void SetAllPickerUppersLayers()
+        {
+            GameObject[] pickerUppers = GameObject.FindGameObjectsWithTag("Pickupper");
+            foreach (GameObject pickUpper in pickerUppers)
+                pickUpper.layer = LLLayers.pickerupLayer;
+        }
+
         public static void ChangeLayersRecursively(Transform transform, int layer)
         {
             transform.gameObject.layer = layer;
@@ -29,7 +36,7 @@ namespace LagLess
             }
         }
 
-        public static void setPooledObjectLayer(GameObject objectToPool)
+        public static void SetPooledObjectLayer(GameObject objectToPool)
         {
             if (objectToPool.tag == "Pickup")
             {
