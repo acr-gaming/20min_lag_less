@@ -31,7 +31,6 @@ namespace LagLess
                 if (!child.gameObject.name.StartsWith("FogReveal"))
                 {
                     ChangeLayersRecursively(child, layer);
-
                 }
             }
         }
@@ -82,7 +81,7 @@ namespace LagLess
                     | (1 << LLLayers.enemyLayer)
                     | (1 << LLLayers.summonCollideOnlyBullet)
                     | (1 << LLLayers.bulletLayer)
-                    | (1 << LLLayers.bulletExplosionLayer);
+                    | (1 << LLLayers.bulletExplosionLayer)
                     | (1 << LLLayers.pickerupLayer);
 
 
