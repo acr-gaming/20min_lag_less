@@ -16,6 +16,13 @@ namespace LagLess
         public static readonly int summonCollideOnlyBullet = 27;
         public static readonly int enemyLayer = 28;
 
+        public static void SetAllPickerUppersLayers()
+        {
+            GameObject[] pickerUppers = GameObject.FindGameObjectsWithTag("Pickupper");
+            foreach (GameObject pickUpper in pickerUppers)
+                pickUpper.layer = LLLayers.pickerupLayer;
+        }
+
         public static void ChangeLayersRecursively(Transform transform, int layer)
         {
             transform.gameObject.layer = layer;
@@ -24,12 +31,11 @@ namespace LagLess
                 if (!child.gameObject.name.StartsWith("FogReveal"))
                 {
                     ChangeLayersRecursively(child, layer);
-
                 }
             }
         }
 
-        public static void setPooledObjectLayer(GameObject objectToPool)
+        public static void SetPooledObjectLayer(GameObject objectToPool)
         {
             if (objectToPool.tag == "Pickup")
             {
@@ -75,7 +81,8 @@ namespace LagLess
                     | (1 << LLLayers.enemyLayer)
                     | (1 << LLLayers.summonCollideOnlyBullet)
                     | (1 << LLLayers.bulletLayer)
-                    | (1 << LLLayers.bulletExplosionLayer);
+                    | (1 << LLLayers.bulletExplosionLayer)
+                    | (1 << LLLayers.pickerupLayer);
 
             GameObject PickerUpper = GameObject.FindGameObjectWithTag("Pickupper");
             PickerUpper.layer = LLLayers.pickerupLayer;

@@ -15,20 +15,18 @@ namespace LagLess
     {
         float defaultExperienceAmount;
         public int extraExperienceCollected;
-        flanne.Pickups.XPPickup thisXPPickup;
-        public bool hasBeenPickedUp = false;
+        public flanne.Pickups.XPPickup flanneXP;
 
         void Awake()
         {
-            thisXPPickup = this.gameObject.GetComponent<flanne.Pickups.XPPickup>();
-            defaultExperienceAmount = thisXPPickup.amount;
+            flanneXP = this.gameObject.GetComponent<flanne.Pickups.XPPickup>();
+            defaultExperienceAmount = flanneXP.amount;
         }
 
         void OnEnable()
         {
-            hasBeenPickedUp = false;
             extraExperienceCollected = 0;
-            thisXPPickup.amount = defaultExperienceAmount;
+            flanneXP.amount = defaultExperienceAmount;
             gameObject.transform.localScale = new Vector3(1, 1, 1);
 
             StartCoroutine(FindAndJoinAnotherXP());
@@ -36,28 +34,36 @@ namespace LagLess
 
         void acceptMoreExperience(float amount, int extraExperienceCollected)
         {
-            thisXPPickup.amount += amount;
+            flanneXP.amount += amount;
             this.extraExperienceCollected += extraExperienceCollected + 1;
-            float scaleFactor = Mathf.Min(1, thisXPPickup.amount * .05f) + Mathf.Min(1, thisXPPickup.amount * .02f) + Mathf.Min(1, thisXPPickup.amount * .005f);
+            float scaleFactor = Mathf.Min(1, flanneXP.amount * .05f) + Mathf.Min(1, flanneXP.amount * .02f) + Mathf.Min(1, flanneXP.amount * .005f);
             gameObject.transform.localScale = new Vector3(1f + scaleFactor, 1f + scaleFactor, 1f + scaleFactor);
         }
 
         IEnumerator FindAndJoinAnotherXP()
         {
             yield return new WaitForSeconds(1.5f);
-            if (hasBeenPickedUp) yield break;
+            if (flanneXP.pickUpCoroutine != null) yield break;
 
             LLXPComponent xpToJoin = findXPToJoin();
             if (xpToJoin)
             {
-                hasBeenPickedUp = true;
-                xpToJoin.acceptMoreExperience(thisXPPickup.amount, extraExperienceCollected);
-                LeanTween.move(gameObject, xpToJoin.transform.position, 0.3f).setEase(LeanTweenType.easeInBounce).setOnComplete(JoinXPDone);
+                flanneXP.pickUpCoroutine = JoinXP(xpToJoin);
+                StartCoroutine(flanneXP.pickUpCoroutine);
             }
         }
 
-        void JoinXPDone()
+        IEnumerator JoinXP(LLXPComponent xpToJoin)
         {
+            xpToJoin.acceptMoreExperience(flanneXP.amount, extraExperienceCollected);
+            int tweenID = LeanTween.move(gameObject, xpToJoin.transform.position, 0.3f).setEase(LeanTweenType.easeInBounce).id;
+
+            while (LeanTween.isTweening(tweenID))
+            {
+                yield return null;
+            }
+
+            flanneXP.pickUpCoroutine = null;
             gameObject.transform.SetParent(ObjectPooler.SharedInstance.transform);
             gameObject.transform.localPosition = Vector3.zero;
             gameObject.SetActive(false);
@@ -78,7 +84,7 @@ namespace LagLess
                 if (
                     otherLLXP &&
                     otherLLXP != this &&
-                    otherLLXP.hasBeenPickedUp == false
+                    otherLLXP.flanneXP.pickUpCoroutine == null
                 )
                 {
                     float distance = (otherLLXP.gameObject.transform.position - currentPosition).sqrMagnitude;
@@ -96,31 +102,6 @@ namespace LagLess
         void OnDisable()
         {
             StopAllCoroutines();
-        }
-    }
-
-    [HarmonyPatch(typeof(flanne.Pickups.Pickup))]
-    public class SelfXPPickupPatch
-    {
-        [HarmonyPatch("OnTriggerEnter2D")]
-        [HarmonyPrefix]
-        static bool OnTriggerEnter2D(Collider2D other, flanne.Pickups.Pickup __instance)
-        {
-            if (other.tag == "Pickupper")
-            {
-                LLXPComponent llxp = __instance.gameObject.GetComponent<LLXPComponent>();
-                if (llxp)
-                {
-                    if (llxp.hasBeenPickedUp) return false;
-                    llxp.hasBeenPickedUp = true;
-                }
-            }
-            else
-            {
-                LLConstants.Logger.LogError($"Pickup collided with something other than pickerupper with tag: {other.tag}");
-            }
-
-            return true;
         }
     }
 

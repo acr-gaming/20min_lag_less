@@ -168,7 +168,7 @@ namespace LagLess
                 }
             }
 
-            LLLayers.setPooledObjectLayer(toReturn);
+            LLLayers.SetPooledObjectLayer(toReturn);
 
             return toReturn;
         }

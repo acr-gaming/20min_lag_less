@@ -37,8 +37,10 @@ namespace LagLess
             Harmony.CreateAndPatchAll(typeof(CollisionLayersPatch));
             Harmony.CreateAndPatchAll(typeof(SummonLayersPatch));
             Harmony.CreateAndPatchAll(typeof(EnemyLayersPatch));
-            Harmony.CreateAndPatchAll(typeof(SelfXPPickupPatch));
             Harmony.CreateAndPatchAll(typeof(XPPickupPatch));
+
+            Harmony.CreateAndPatchAll(typeof(ModPowerUpFixPatch));
+            Harmony.CreateAndPatchAll(typeof(ModStartFixPatch));
 
             if (LLConfigs.enableJuice.Value)
             {
